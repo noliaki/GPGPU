@@ -1,4 +1,15 @@
+/* globals requestAnimationFrame */
+
 import * as Three from 'three'
+import OrbitControls from 'three-orbitcontrols'
+// import { GPUComputationRenderer } from 'gpucomputationrender-three'
+import vertexShader from './shader/vertex-shader'
+import fragmentShader from './shader/fragment-shader'
+// import conputeVelocityShader from './shader/compute-velocity'
+// import conputePositionShader from './shader/compute-position'
+
+const SIZE = 500
+const PARTICLES = SIZE * SIZE
 
 const scene = new Three.Scene()
 const camera = new Three.PerspectiveCamera(
@@ -7,32 +18,21 @@ const camera = new Three.PerspectiveCamera(
   0.1,
   1000
 )
-camera.lookAt(scene.position)
+
+const renderer = new Three.WebGLRenderer({
+  canvas: document.getElementById('app')
+})
+const controls = new OrbitControls(camera, renderer.domElement)
 camera.position.z = 100
-// camera.position.x = -100
 
-const renderer = new Three.WebGLRenderer()
-
-const planeGeo = new Three.PlaneGeometry(50, 50)
-const planeMaterial = new Three.MeshBasicMaterial({
-  color: 0x00aaff
+const shaderMaterial = new Three.ShaderMaterial({
+  vertexShader,
+  fragmentShader,
+  blending: Three.AdditiveBlending,
+  depthTest: false,
+  transparent: true,
+  vertexColors: true
 })
 
-const plane = new Three.Mesh(planeGeo, planeMaterial)
+const geometry = new Three.BufferGeometry()
 
-plane.position.x = 15
-
-scene.add(plane)
-
-const sphereGo = new Three.SphereGeometry(4, 20, 20)
-const sphereMaterial = new Three.MeshBasicMaterial({
-  wireframe: true
-})
-const sphere = new Three.Mesh(sphereGo, sphereMaterial)
-
-scene.add(sphere)
-
-renderer.setClearColor(new Three.Color(0xcccccc))
-renderer.setSize(window.innerWidth, window.innerHeight)
-document.getElementById('app').appendChild(renderer.domElement)
-renderer.render(scene, camera)
